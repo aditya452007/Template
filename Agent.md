@@ -272,6 +272,7 @@ Read `DESIGN-PSYCHOLOGY.md` for deep design knowledge. Use these resources befor
 - **When the user describes UI vaguely, use namethatui.com** to translate to exact component names
 - **Never use `npx install --force` or `npm install --force`** — resolve dependency conflicts properly
 - **Never create flat `components/` folders** — always organize by feature
+- **After running Skills.py, MUST install specify:** `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@latest` then `specify init .` — this unlocks speckit.* SDLC commands
 - Load skills before writing code. Do not guess design decisions.
 - Update `progress-tracker.md` after every meaningful change.
 - If unsure about a design decision, ask the user.

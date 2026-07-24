@@ -18,8 +18,12 @@
 # Install dependencies
 npm install
 
-# Install skills (AI agent design/development skills)
+# 1. Install skills (AI agent design/development skills)
 python Skills.py
+
+# 2. Install Spec Kit (SDLC workflow commands — run AFTER Skills.py)
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@latest
+specify init .
 
 # Run development server
 npm run dev
@@ -54,6 +58,15 @@ npm run dev
 ## Skills
 
 Skills are in `.agents/` — run `python Skills.py` to install AI agent design and development skills. See `.agents/AGENTS.md` for details.
+
+**After running Skills.py, you MUST also run specify to install the SDLC workflow commands:**
+
+```bash
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@latest
+specify init .
+```
+
+This unlocks the `/speckit.*` commands (speckit.specify, speckit.plan, speckit.tasks, etc.).
 
 ## Important Rules
 
