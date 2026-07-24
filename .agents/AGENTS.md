@@ -10,24 +10,23 @@ There are **two locations** for skills in this template:
 
 | Location | Purpose | Installed By |
 |----------|---------|-------------|
-| `.agent/` | Your custom/template-embedded skills | Always available — part of the template |
+| `.agents/` | Your custom/template-embedded skills | Always available — part of the template |
 | `.agents/skills/` | Community skills from GitHub | `python Skills.py` (via `npx skills add`) |
 
 ---
 
 ## Available Skills
 
-### Template-Embedded Skills (Always Available — `.agent/`)
+### Template-Embedded Skills (Always Available — `.agents/`)
 
 These skills ship with the template — no installation needed.
 
 | Skill | Path | Purpose | How to Initialize |
 |-------|------|---------|-------------------|
-| **design-basics** | `.agent/design-basics/SKILL.md` | UI/UX fundamentals: color, typography, layout, accessibility, spacing | Say: `I'll use the design-basics skill` — then read `guardrails.md` first |
-| **premium-design** | `.agent/premium-design/SKILL.md` | Premium UI polish: design tokens, interaction patterns, premium aesthetics | Say: `I'll use the premium-design skill` — then read `SKILL.md` |
-| **performance_engineering** | `.agent/performance_engineering/` | Core Web Vitals, Lighthouse optimization, performance best practices | Say: `I'll use performance_engineering` — then reference files in folder |
-| **ui-checklist** | `.agent/ui-checklist/SKILL.md` | Component/page completeness checklists from checklist.design | Say: `I'll use ui-checklist` — then read `SKILL.md` |
-| **Speckit Commands** | `.agent/commands/` | SDLC workflow: specify, plan, tasks, implement, analyze | Use `/<command>` pattern — e.g., `/speckit.plan` |
+| **design-basics** | `.agents/design-basics/SKILL.md` | UI/UX fundamentals: color, typography, layout, accessibility, spacing | Say: `I'll use the design-basics skill` — then read `guardrails.md` first |
+| **premium-design** | `.agents/premium-design/SKILL.md` | Premium UI polish: design tokens, interaction patterns, premium aesthetics | Say: `I'll use the premium-design skill` — then read `SKILL.md` |
+| **performance_engineering** | `.agents/performance_engineering/` | Core Web Vitals, Lighthouse optimization, performance best practices | Say: `I'll use performance_engineering` — then reference files in folder |
+| **ui-checklist** | `.agents/ui-checklist/SKILL.md` | Component/page completeness checklists from checklist.design | Say: `I'll use ui-checklist` — then read `SKILL.md` |
 
 ### Skills Installed via Skills.py (Run `python Skills.py` First — `.agents/skills/`)
 
@@ -72,16 +71,15 @@ Say one of these phrases to activate the skill:
 
 ### Step 2: Read the Entry Point
 Read the skill's `SKILL.md` (or entry point file) to understand its rules:
-- For `design-basics`: read `.agent/design-basics/guardrails.md` FIRST, then relevant module
+- For `design-basics`: read `.agents/design-basics/guardrails.md` FIRST, then relevant module
 - For `hallmark`: read `.agents/skills/hallmark/SKILL.md`, then reference the component-cookbook
-- For `ui-checklist`: read `.agent/ui-checklist/SKILL.md`, then open the relevant section
+- For `ui-checklist`: read `.agents/ui-checklist/SKILL.md`, then open the relevant section
 
 ### Step 3: Apply the Rules
 Follow the skill's instructions literally — do not approximate or summarize.
 
 ### Step 4: Use Commands (if applicable)
 - For Impeccable: use `impeccable craft`, `impeccable shape`, `impeccable critique`, etc.
-- For Speckit: use `/<command>` — e.g., `/speckit.specify`, `/speckit.plan`
 
 ---
 
@@ -91,11 +89,11 @@ For a design + development task:
 
 ```
 1. design-taste-frontend    → Establish Design Read, set Three Dials (.agents/skills/)
-2. design-basics            → Color, typography, spacing fundamentals (.agent/)
+2. design-basics            → Color, typography, spacing fundamentals (.agents/)
 3. emil-design-eng          → Animation decisions, interaction polish (.agents/skills/)
 4. high-end-visual-design   → Premium patterns, agency-level polish (.agents/skills/)
 5. hallmark                 → Reference design patterns, components (.agents/skills/)
-6. ui-checklist             → Verify completeness at the end (.agent/)
+6. ui-checklist             → Verify completeness at the end (.agents/)
 7. full-output-enforcement  → Before generating specs/plans (.agents/skills/)
 ```
 
@@ -114,28 +112,16 @@ For a design audit of existing code:
 
 ---
 
-## Commands Quick Reference
-
-| Command | Where | Purpose |
-|---------|-------|---------|
-| `/speckit.specify` | `.agent/commands/` | Create feature spec |
-| `/speckit.plan` | `.agent/commands/` | Create implementation plan |
-| `/speckit.tasks` | `.agent/commands/` | Break plan into tasks |
-| `/speckit.implement` | `.agent/commands/` | Execute tasks |
-| `/speckit.analyze` | `.agent/commands/` | Cross-artifact consistency |
-| `/speckit.clarify` | `.agent/commands/` | Resolve ambiguities |
-| `impeccable craft` | Impeccable CLI | End-to-end feature build |
-| `impeccable shape` | Impeccable CLI | UX/UI planning |
-| `impeccable critique` | Impeccable CLI | Design review |
-| `impeccable audit` | Impeccable CLI | Technical quality audit |
-
----
-
 ## Important Notes for AI Agents
 
 1. **Skills are not auto-loaded.** You must explicitly activate them before use.
 2. **Read the SKILL.md** — don't guess what a skill does.
 3. **Follow the loading order** for cross-domain tasks to avoid conflicts.
 4. **If a skill isn't found**, it may need to be installed via `python Skills.py`.
-5. **Template-embedded skills** (in `.agent/`: design-basics, premium-design, performance_engineering, ui-checklist) are always available — no install needed. **Installed skills** (in `.agents/skills/`: GSAP, Taste, Emil, Hallmark, etc.) are available after running `python Skills.py`.
+5. **Template-embedded skills** (in `.agents/`: design-basics, premium-design, performance_engineering, ui-checklist) are always available — no install needed. **Installed skills** (in `.agents/skills/`: GSAP, Taste, Emil, Hallmark, etc.) are available after running `python Skills.py`.
 6. **After installing skills**, you may need to reload/restart the agent tool to detect them.
+7. **Component libraries**: Always reference `DESIGN.md` before choosing UI libraries. Never default to a single library.
+8. **Design psychology**: Read `DESIGN-PSYCHOLOGY.md` before any feature design. Use namethatui.com when the user describes UI vaguely.
+9. **Astryx (Meta)**: Check `https://astryx.atmeta.com/docs/getting-started` first for production components.
+10. **Folder structure**: Follow the feature-first pattern in `Agent.md`. No flat `components/` or `utils/` folders.
+11. **Never use `npm install --force` or `npx install --force`** — resolve dependency conflicts properly.

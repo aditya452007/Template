@@ -34,16 +34,33 @@ If a change cannot be verified end to end quickly, the scope is too broad — sp
 
 Before implementing any feature, load skills in this order:
 
-1. **`design-taste-frontend`** — Establish design read, set Three Dials
-2. **`design-basics`** — Apply fundamentals (color, typography, spacing, accessibility)
-3. **`Design Engineering`** — Animation Decision Framework
-4. **`high-end-visual-design`** — Agency-level polish
-5. **`full-output-enforcement`** — For exhaustive output, ban placeholder patterns
-6. **`hallmark`** — Reference design patterns and macrostructures
+1. **`DESIGN-PSYCHOLOGY.md`** — Read applicable chapters (user psychology, cognitive biases)
+2. **`design-taste-frontend`** — Establish design read, set Three Dials
+3. **`design-basics`** — Apply fundamentals (color, typography, spacing, accessibility)
+4. **`Design Engineering`** — Animation Decision Framework
+5. **`high-end-visual-design`** — Agency-level polish
+6. **`full-output-enforcement`** — For exhaustive output, ban placeholder patterns
+7. **`hallmark`** — Reference design patterns and macrostructures
+8. **`Astryx`** — Reference Meta's production-grade design system for components and tokens
 
-For stress-testing decisions: use **`Grill_Me`** before committing to a direction.
-For design audits of existing code: use **`redesign-existing-projects`**.
-For component coverage: use **`ui-checklist`**.
+## Component Selection Protocol
+
+1. Open `DESIGN.md` and review the curated library list
+2. If the user describes UI vaguely, use **namethatui.com** to translate to exact component names
+3. **Always check Astryx first** for standard components (buttons, forms, tables, dialogs, nav)
+4. For animated/premium sections (hero, pricing, FAQ): Animata, Cult UI, Skipper UI, React Bits Pro
+5. For utility components: COSS UI, HeroUI, or Astryx
+6. **Never default to HeroUI** — it is one option among many
+7. **Never use Mantine, Chakra, MUI, Ant Design** — not allowed
+8. Mix and match across libraries — do not commit to one library
+
+## Project Structure Enforcement
+
+- **Frontend**: Feature-first (see `Agent.md` for the full structure)
+- **Backend**: Controller-Service-Repository pattern (see `Agent.md`)
+- **No flat `components/` or `utils/` folders** — organize by feature
+- **No cross-feature imports** — promote shared code to `entities/` or `shared/`
+- **Every feature has a public `index.ts`** — no deep imports into feature internals
 
 ## Handling Missing Requirements
 
@@ -54,7 +71,7 @@ For component coverage: use **`ui-checklist`**.
 ## Protected Files
 
 Do not modify the following unless explicitly instructed:
-- `src/components/ui/*` — generated primitives
+- `src/shared/ui/*` — generated primitives
 - `node_modules/`, `.next/`, build output directories
 
 ## Keeping Docs in Sync
@@ -74,3 +91,11 @@ Update the relevant context file whenever implementation changes:
 4. Build passes
 5. Lint passes
 6. Typecheck passes
+7. Folder structure follows feature-first convention
+
+## Prohibited Practices
+
+- **No `npx install --force` or `npm install --force`** — resolve dependency conflicts properly
+- **No single-library default** — always reference DESIGN.md and mix libraries
+- **No flat folder structures** — always organize by feature/domain
+- **No cross-feature imports** — use `entities/` or `shared/` for shared code

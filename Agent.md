@@ -1,6 +1,6 @@
 # Agent Execution Protocol
 
-This document defines **how to execute tasks in this project** — the workflow, skill usage, and execution discipline. Any AI agent executing work in this project MUST read this first and follow the protocol.
+This document defines **how to execute tasks in this project** — the workflow, skill usage, folder structure, and execution discipline. Any AI agent executing work in this project MUST read this first and follow the protocol.
 
 ---
 
@@ -8,9 +8,12 @@ This document defines **how to execute tasks in this project** — the workflow,
 
 1. Read the **Context Hierarchy** below before writing any code
 2. Follow the **Design-First Feature Workflow** — spec first, visualize, clarify, approve, then build
-3. Identify which **domain** your task belongs to using the **Skill Mapping Table**
-4. Load the right skill(s) via the `skill` tool before implementing
-5. Run **Pre-Exit Checks** before marking any task complete
+3. Follow the **Project Structure Standards** for folder hierarchy
+4. Identify which **domain** your task belongs to using the **Skill Mapping Table**
+5. Load the right skill(s) via the `skill` tool before implementing
+6. Reference **DESIGN.md** for component library selection — never default to a single library
+7. Reference **Astryx (Meta design system)** for production-grade components and tokens
+8. Run **Pre-Exit Checks** before marking any task complete
 
 ---
 
@@ -46,129 +49,196 @@ Only after approval, proceed with implementation: Plan → Tasks → Build.
 
 ---
 
+## Project Structure Standards
+
+### Frontend — Feature-First Architecture
+
+Every Next.js project must follow this feature-first structure. Group code by business domain, not by file type.
+
+```
+src/
+├── app/                          # Next.js App Router (routes, layouts, providers)
+│   ├── layout.tsx                # Root layout (fonts, metadata, providers)
+│   ├── page.tsx                  # Home page (thin composition layer)
+│   ├── (auth)/                   # Route group for auth pages
+│   │   ├── login/page.tsx
+│   │   └── register/page.tsx
+│   └── (dashboard)/
+│       ├── layout.tsx
+│       └── page.tsx
+├── features/                     # Feature modules (self-contained, domain-driven)
+│   ├── auth/                     # Example: Authentication feature
+│   │   ├── api/                  # API calls, mutations, queries
+│   │   ├── components/           # Feature-specific UI (LoginForm, AuthGuard)
+│   │   ├── hooks/                # Feature-specific hooks (useAuth, useSession)
+│   │   ├── types/                # Domain types (User, Session)
+│   │   └── index.ts             # Public API — only exports from here
+│   ├── billing/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── types/
+│   │   └── index.ts
+│   └── dashboard/
+│       ├── api/
+│       ├── components/
+│       ├── hooks/
+│       ├── types/
+│       └── index.ts
+├── shared/                       # Business-agnostic reusable code
+│   ├── ui/                       # Design system primitives (Button, Input, Modal)
+│   ├── hooks/                    # Generic hooks (useDebounce, useMediaQuery)
+│   ├── lib/                      # Pure utilities (formatDate, cn, validators)
+│   ├── api/                      # HTTP client, interceptors
+│   └── types/                    # Shared types
+├── entities/                     # Domain models shared across features
+│   ├── user/
+│   │   ├── api/
+│   │   ├── model/                # Types, schemas, invariants
+│   │   └── index.ts
+│   └── organization/
+│       ├── api/
+│       ├── model/
+│       └── index.ts
+├── lib/                          # Low-level infrastructure
+│   ├── api-client.ts             # Axios / fetch client
+│   ├── query-client.ts           # TanStack Query setup
+│   └── logger.ts
+├── config/                       # Runtime config, env vars, constants
+│   └── index.ts
+└── styles/                       # Global styles, design tokens
+    ├── globals.css
+    └── tokens.css
+```
+
+### Backend — Controller-Service-Repository Pattern
+
+```
+src/
+├── controllers/                  # HTTP layer — request parsing, response formatting
+│   ├── auth.controller.ts
+│   ├── user.controller.ts
+│   └── billing.controller.ts
+├── services/                     # Business logic layer
+│   ├── auth.service.ts
+│   ├── user.service.ts
+│   └── billing.service.ts
+├── repositories/                 # Data access layer (DB queries, external APIs)
+│   ├── user.repository.ts
+│   ├── billing.repository.ts
+│   └── subscription.repository.ts
+├── middleware/                    # Express/Next.js middleware
+│   ├── auth.middleware.ts
+│   ├── rate-limit.middleware.ts
+│   └── validation.middleware.ts
+├── validators/                   # Request validation schemas
+│   ├── auth.validator.ts
+│   └── billing.validator.ts
+├── types/                        # Shared backend types
+├── config/                       # Config, env vars, DB connection
+├── utils/                        # Pure helpers
+└── index.ts                      # App entry point
+```
+
+### Dependency Direction
+```
+app/ (pages) → features/ → entities/ → shared/
+app/ (pages) → features/ → shared/
+features/ → shared/
+features/ → entities/
+entities/ → shared/
+
+NEVER: features/ → features/ (cross-feature imports)
+NEVER: shared/ → features/ or entities/ (shared must not know about business logic)
+NEVER: entities/ → features/ (domain models don't depend on workflows)
+```
+
+### Key Rules
+1. **Each feature is a self-contained module** — owns its API calls, components, hooks, types
+2. **Public API via `index.ts`** — external code imports only from `features/auth`, never deep paths
+3. **Co-locate by domain** — tests, styles, and types stay next to the code they belong to
+4. **Promote to `shared/` only on second use** — avoid premature abstraction
+5. **`entities/` for stable domain models** — User, Product, Organization (not features)
+6. **`app/` pages are thin** — they compose, not contain business logic
+
+---
+
 ## Skill Mapping Table
 
-All skills are in `.agent/`:
+All skills are in `.agents/`:
 
-| # | Domain | Skill | Location | When to Use | How to Use |
-|---|--------|-------|----------|-------------|------------|
-| 1 | **Design Fundamentals** | `design-basics` | `.agent/design-basics/` | Any visual decision: colors, typography, spacing, layout, accessibility | Read `guardrails.md` first, load relevant module, use `reference.md` for cheat sheets |
-| 2 | **Premium UI Polish** | `premium-design` | `.agent/premium-design/` | Making UI look premium/professional — typography, color, layout, tokens | Read SKILL.md, apply principles |
-| 3 | **Performance Engineering** | `performance_engineering` | `.agent/performance_engineering/` | Optimizing performance, Core Web Vitals, Lighthouse scores | Read reference docs, apply optimizations |
-| 4 | **UI/UX Checklist** | `ui-checklist` | `.agent/ui-checklist/` | Auditing components/pages for completeness | Read SKILL.md, walk through checklists |
-| 5 | **Design Taste** | `design-taste-frontend` | `.agents/skills/design-taste-frontend/` | Landing pages, redesigns, non-templated design | Declare Design Read, set Three Dials |
-| 6 | **High-End Visual Design** | `high-end-visual-design` | `.agents/skills/high-end-visual-design/` | Building premium sections | Apply premium patterns, enforce motion guardrails |
-| 7 | **Hallmark** | `hallmark` | `.agents/skills/hallmark/` | Design patterns, component recipes, macrostructures | Read SKILL.md, reference component-cookbook |
-| 8 | **Design Engineering** | `emil-design-eng` | `.agents/skills/emil-design-eng/` | Animation decisions, UI polish, micro-interactions | Apply Animation Decision Framework |
-| 4 | **UI/UX Checklist** | `ui-checklist` | `.agent/ui-checklist/` | Auditing components/pages for completeness; planning new features | Identify what you're building, open relevant section, audit each item |
-| 5 | **Design Taste** | `design-taste-frontend` | Installed via Skills.py | Landing pages, redesigns, when you need non-templated design | Declare Design Read, set Three Dials, apply anti-center bias |
-| 6 | **High-End Visual Design** | `high-end-visual-design` | Installed via Skills.py | Building premium sections: hero, bento grids, CTA, nav, testimonials | Apply premium patterns, enforce motion guardrails |
-| 7 | **Design Engineering** | Emil's skill | Installed via Skills.py | Animation decisions, UI polish, micro-interactions | Apply Animation Decision Framework (4 questions) |
-| 8 | **Design Quality Gate** | `redesign-existing-projects` | Installed via Skills.py | Auditing existing UI, upgrading without breaking | Audit for issues, apply premium replacements, verify nothing broke |
-| 9 | **Exhaustive Output** | `full-output-enforcement` | Installed via Skills.py | Planning/spec/task generation where truncation would lose info | Load at start of planning or execution to prevent placeholders |
-| 10 | **Hallmark Design System** | `hallmark` | `.agent/hallmark/` | Design pattern references, component recipes, macrostructures | Reference the component cookbook, study macrostructures |
-| 11 | **Animation / Motion** | GSAP skills | Installed via Skills.py | GSAP-specific animations, scroll triggers, timelines | Load GSAP skill before implementing scroll-driven animations |
-| 12 | **Decision Stress-Testing** | `Grill_Me` | Installed via Skills.py | When you need to stress-test a plan or design | Ask questions one at a time |
-| 13 | **UI Checklist** | `ui-checklist` | `.agent/ui-checklist/` | Ensuring nothing is missed in UI components/pages | Walk through checklists for each component/page type |
-
-## Skill Initialization Instructions
-
-For skills that need to be **loaded/initialized** before use, follow these patterns:
-
-### Pattern A: Template-Embedded Skills (Always Available)
-These skills are part of the template and ready to use immediately:
-
-- **`design-basics`** — Load with: `I'll use the design-basics skill for this task.` — then read `.agent/skills/design-basics/guardrails.md` first
-- **`premium-design`** — Load with: `I'll use the premium-design skill.` — then read `.agent/skills/premium-design/SKILL.md`
-- **`performance_engineering`** — Load with: `I'll use performance_engineering for optimization.` — reference files in `.agent/skills/performance_engineering/`
-- **`ui-checklist`** — Load with: `I'll use the ui-checklist skill.` — then read `.agent/ui-checklist/SKILL.md`
-- **`hallmark`** — Load with: `I'll use the hallmark design system skill.` — then read `.agent/hallmark/SKILL.md`
-
-### Pattern B: Skills Installed via Skills.py (Install Then Load)
-These skills need to be installed first by running `python Skills.py`, then loaded:
-
-1. **`design-taste-frontend`** — After install, load with: `I'll use design-taste-frontend for this design.` Read SKILL.md and apply Three Dials
-2. **`high-end-visual-design`** — After install, load with: `Using high-end-visual-design for premium polish.`
-3. **`Design Engineering` (Emil's)** — After install, load with: `I'll apply Emil's Design Engineering philosophy.`
-4. **`redesign-existing-projects`** — After install, load with: `I'll use redesign-existing-projects to audit this.`
-5. **`full-output-enforcement`** — After install, load with: `I'll enforce full output for this task.`
-6. **GSAP skills** — After install, load with: `I'll use GSAP skills for animation.`
-7. **`Grill_Me`** — After install, load with: `I'll use Grill_Me to stress-test this plan.`
-8. **`brandkit`** — After install, load with: `I'll use brandkit for branding decisions.`
-
-### Skill Loading Order (Cross-Domain Tasks)
-
-When a task crosses multiple domains, load skills in this order:
-
-1. **`design-taste-frontend`** — Read the brief, set dials, establish design read
-2. **`design-basics`** — Apply fundamentals (color, typography, spacing, accessibility)
-3. **`Design Engineering`** — Choreograph motion decisions
-4. **`high-end-visual-design`** — Apply premium agency-level polish
-5. **`hallmark`** — Reference design patterns and macrostructures
-6. **`full-output-enforcement`** — Before generating exhaustive docs/plans
+| # | Domain | Skill | Location | When to Use |
+|---|--------|-------|----------|-------------|
+| 1 | **Design Fundamentals** | `design-basics` | `.agents/design-basics/` | Any visual decision: colors, typography, spacing, layout, accessibility |
+| 2 | **Premium UI Polish** | `premium-design` | `.agents/premium-design/` | Making UI look premium/professional — typography, color, layout, tokens |
+| 3 | **Performance Engineering** | `performance_engineering` | `.agents/performance_engineering/` | Optimizing performance, Core Web Vitals, Lighthouse scores |
+| 4 | **UI/UX Checklist** | `ui-checklist` | `.agents/ui-checklist/` | Auditing components/pages for completeness |
+| 5 | **Design Psychology** | `DESIGN-PSYCHOLOGY.md` | `DESIGN-PSYCHOLOGY.md` (root) | User describes UI vaguely, or before any feature design — understand psychology + systems thinking |
+| 6 | **DESIGN.md** | Component Libraries | `DESIGN.md` (root) | Reference curated component libraries before writing UI code |
+| 7+ | **Installed Skills** | Various | `.agents/skills/` | After running `python Skills.py` |
 
 ---
 
-## Command Reference
+## Component Library Selection Protocol
 
-### Speckit Workflow Commands
-
-These commands live in `.agent/commands/` and are invoked via the `/<command>` pattern:
-
-| Command | File | Purpose |
-|---------|------|---------|
-| `/speckit.specify` | `speckit.specify.md` | Create feature specification |
-| `/speckit.clarify` | `speckit.clarify.md` | Resolve spec ambiguities |
-| `/speckit.plan` | `speckit.plan.md` | Create implementation plan |
-| `/speckit.tasks` | `speckit.tasks.md` | Generate executable task list |
-| `/speckit.analyze` | `speckit.analyze.md` | Cross-artifact consistency check |
-| `/speckit.implement` | `speckit.implement.md` | Execute implementation tasks |
-| `/speckit.checklist` | `speckit.checklist.md` | Generate quality checklists |
-| `/speckit.constitution` | `speckit.constitution.md` | Update project constitution |
-| `/speckit.taskstoissues` | `speckit.taskstoissues.md` | Convert tasks to GitHub issues |
-| `/speckit.agent-context.update` | `speckit.agent-context.update.md` | Refresh agent context |
-
-### Git Commands
-
-| Command | File | Purpose |
-|---------|------|---------|
-| `/speckit.git.initialize` | `speckit.git.initialize.md` | Initialize git repo |
-| `/speckit.git.feature` | `speckit.git.feature.md` | Create feature branch |
-| `/speckit.git.commit` | `speckit.git.commit.md` | Auto-commit after commands |
-| `/speckit.git.remote` | `speckit.git.remote.md` | Detect Git remote URL |
-| `/speckit.git.validate` | `speckit.git.validate.md` | Validate branch naming |
+1. **Always reference DESIGN.md** before choosing a component library
+2. When the user describes a UI element in vague/layman terms, **use namethatui.com** (https://namethatui.com/) to translate their description into the correct component name
+3. **Check Astryx (Meta) first** for standard UI patterns — buttons, forms, tables, dialogs, nav
+4. For **animated/premium sections** (hero, pricing, FAQ): Animata, Cult UI, Skipper UI, React Bits Pro, Aceternity, MagicUI
+5. For **utility components** (tabs, accordions, tooltips): COSS UI, HeroUI, or Astryx
+6. **Never default to HeroUI** — it's one option among many, not the default
+7. **Never use Mantine, Chakra, MUI, Ant Design** — these are not allowed
+8. **Prefer CLI-installable or copy-paste** — shadcn registry, direct source. Own the code.
+9. **Mix libraries** — a hero from one, pricing from another, forms from Astryx
 
 ---
 
-## Folder Structure
+## Astryx (Meta) Design System — Primary Reference
 
-```
-├── .agent/                      # Your custom/template-embedded agent skills
-│   ├── commands/                # Speckit SDLC workflow commands
-│   ├── design-basics/           # Design fundamentals skill (your custom)
-│   ├── premium-design/          # Premium UI design skill (your custom)
-│   ├── performance_engineering/ # Performance optimization skill
-│   └── ui-checklist/            # UI Checklist skill
-├── .agents/skills/              # Community skills installed via `npx skills add` (run Skills.py)
-│   ├── gsap-*/                  # GSAP animation skills
-│   ├── design-taste-frontend/   # Design taste skill
-│   ├── high-end-visual-design/  # Premium agency-level polish
-│   ├── hallmark/                # Hallmark design system
-│   ├── emil-design-eng/         # Emil Kowalski's design engineering
-│   └── ... (28+ skills)
-├── Agent.md                     # This file — execution protocol
-├── Skills.py                    # Skill installer script (run to install external skills)
-├── skills-lock.json             # Skills registry
-├── context/                     # Project context files
-│   ├── project-overview.md
-│   ├── architecture.md
-│   ├── ui-context.md
-│   ├── code-standards.md
-│   ├── ai-workflow-rules.md
-│   └── progress-tracker.md
-├── README.md                    # Project documentation
-└── src/                         # Application source code (TO BE CREATED)
-```
+URL: https://astryx.atmeta.com/docs/getting-started
+
+Astryx is Meta's design system. It provides:
+
+- **200+ production-grade components** — Button, Dialog, Table, Form fields, Navigation, Layout, Toast, etc.
+- **Full design token system** — colors, spacing, typography, elevation, motion, shape
+- **7 themes** — neutral, butter, chocolate, gothic, matcha, stone, y2k
+- **Page templates** — full layouts and page shells
+- **AI-specific components** — Chat Composer, Command Palette, Tokenized Text, Streaming Text
+- **StyleX integration** — atomic CSS-in-JS for custom styling
+- **CLI tool** — `npx @astryxdesign/cli init` to set up agent docs
+
+**Always check Astryx first for any standard UI component before pulling from other libraries.**
+
+---
+
+## Design Psychology Protocol
+
+Read `DESIGN-PSYCHOLOGY.md` for deep design knowledge. Use these resources before making design decisions:
+
+### NameThatUI — Translate Vague User Descriptions
+- **URL:** https://namethatui.com/
+- **When:** The user says "the thing that does X" or describes a UI element in layman terms
+- **What it does:** Translates vague descriptions into exact component names, ARIA roles, and HTML elements
+- **Do this:** Go to the site, describe what the user said, find the real name, then build that component
+- **Example:** User says "the dark layer behind the popup" → you find "Scrim (Backdrop)" → you build a `<dialog>` with `::backdrop`
+
+### Product Design Psychology — Design Products People Love
+- **URL:** https://productdesignpsychology.com/
+- **When:** Before ANY feature design — especially forms, checkout flows, navigation, and onboarding
+- **What it gives you:** 40 chapters on cognitive biases, user psychology, and organizational dynamics
+- **Key principles to always apply:**
+  - "Nobody Remembers Your UI" — design for recognition, not recall
+  - "Design the Last Moment First" — start with the user's goal
+  - "Fake Progress Is Real Motivation" — show progress, celebrate completions
+  - "More Options Make Users Quit" — fewer choices = more conversions
+  - "Layout Speaks Before You Do" — visual hierarchy communicates priority
+  - "Your UI Is Exhausting" — minimize cognitive load at every step
+
+### DesignSystems.com — Industry Best Practices
+- **URL:** https://www.designsystems.com/
+- **When:** Setting up design tokens, component architecture, typography, icons, accessibility
+- **What it gives you:** Guides from Figma + case studies from Spotify, Atlassian, GitHub, Salesforce
+- **Reference for:** Typography systems, grid/layout foundations, iconography, design token strategy
 
 ---
 
@@ -181,6 +251,7 @@ These commands live in `.agent/commands/` and are invoked via the `/<command>` p
 5. Only `transform` + `opacity` are animated — no layout properties
 6. No hardcoded colors — all use CSS custom properties from `ui-context.md`
 7. `progress-tracker.md` is updated with the completed work
+8. Folder structure follows the feature-first convention (no flat `components/` dumping ground)
 
 ---
 
@@ -196,6 +267,11 @@ These commands live in `.agent/commands/` and are invoked via the `/<command>` p
 ## Important Rules
 
 - **Never jump to coding.** Always follow the Design-First Feature Workflow
+- **Never default to a single component library.** Mix and match from DESIGN.md
+- **Before any feature design, read DESIGN-PSYCHOLOGY.md** — understand user psychology and cognitive biases first
+- **When the user describes UI vaguely, use namethatui.com** to translate to exact component names
+- **Never use `npx install --force` or `npm install --force`** — resolve dependency conflicts properly
+- **Never create flat `components/` folders** — always organize by feature
 - Load skills before writing code. Do not guess design decisions.
 - Update `progress-tracker.md` after every meaningful change.
-- If unsure about a design decision, load `Grill_Me` or ask the user.
+- If unsure about a design decision, ask the user.

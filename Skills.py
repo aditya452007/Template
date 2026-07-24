@@ -172,9 +172,9 @@ def main():
             run_command("npm init -y", "Initializing package.json")
 
     print_header("Installing Skills (Concurrently)")
-    
+
     impeccable_cmd = "npx -y impeccable install -y" if args.yes else "npx impeccable install"
-    
+
     tasks = [
         ("npx -y skills add https://github.com/greensock/gsap-skills", "Add GSAP animation skills", True),
         ("npx -y skills add nutlope/hallmark", "Add Hallmark design system skill", True),
@@ -182,13 +182,13 @@ def main():
         ("npx -y skills@latest add emilkowalski/skills", "Add Emil Kowalski's skills", True),
         (impeccable_cmd, "Install Impeccable design engine", False),
     ]
-    
+
     with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
         future_to_desc = {
             executor.submit(run_command_parallel_worker, cmd, desc, lock_req): desc
             for cmd, desc, lock_req in tasks
         }
-        
+
         for future in as_completed(future_to_desc):
             desc = future_to_desc[future]
             try:
@@ -198,7 +198,7 @@ def main():
                         print_success(f"Successfully Completed: {desc}")
                     else:
                         print_error(f"Failed or Completed with Warnings: {desc}")
-                    
+
                     if logs:
                         print(f"--- Logs for {desc} ---")
                         for line in logs:
@@ -211,22 +211,25 @@ def main():
     print_header("Setup Complete!")
     print_success("All skills have been successfully installed!")
     print()
-    print(f"{Colors.BOLD}Template-embedded skills (always available):{Colors.ENDC}")
-    print("  .agent/design-basics/          - Design fundamentals")
-    print("  .agent/premium-design/          - Premium UI design")
-    print("  .agent/performance_engineering/ - Performance optimization")
-    print("  .agent/ui-checklist/            - UI/UX completeness checklists")
-    print("  .agent/commands/               - Speckit SDLC workflow commands")
+    print(f"{Colors.BOLD}Template-embedded skills (always available — .agents/):{Colors.ENDC}")
+    print("  .agents/design-basics/          - Design fundamentals")
+    print("  .agents/premium-design/          - Premium UI design")
+    print("  .agents/performance_engineering/ - Performance optimization")
+    print("  .agents/ui-checklist/            - UI/UX completeness checklists")
     print()
-    print(f"{Colors.BOLD}Installed skills (from GitHub):{Colors.ENDC}")
+    print(f"{Colors.BOLD}Installed skills (from GitHub — .agents/skills/):{Colors.ENDC}")
     print("  .agents/skills/gsap-*/          - GSAP animation skills (8)")
     print("  .agents/skills/hallmark/        - Hallmark design system")
     print("  .agents/skills/*                - Taste skills (13)")
     print("  .agents/skills/*                - Emil Kowalski skills (6)")
     print()
+    print(f"{Colors.BOLD}Design Resources — DESIGN.md:{Colors.ENDC}")
+    print("  Curated premium libraries: Animata, Cult UI, Skipper UI, Astryx (Meta), HeroUI, COSS UI")
+    print("  Premium animated: React Bits Pro, Aceternity, MagicUI, beUI Pro, Velocity UI, FutureUI")
+    print("  Animation: Motion (Framer), GSAP, React Spring")
+    print()
     print(f"{Colors.BOLD}Next Steps — Install Spec Kit (Optional):{Colors.ENDC}")
     print("  Spec Kit provides the /speckit.* workflow commands for SDLC.")
-    print("  The command files are already in .agent/commands/.")
     print("  To install the CLI tool (for plan/task generation):")
     print()
     print("  1. Install uv (if not installed):")
